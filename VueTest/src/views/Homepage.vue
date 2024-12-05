@@ -12,14 +12,15 @@
         <p v-else-if="error">{{ error }}</p>
   
       <!-- Hiển thị danh sách type rooms -->
-    <div class="room-list">
-            <div v-if="typeRooms.length > 0">
-                <div class="room-row" v-for="(roomRow, index) in chunkedRooms" :key="index">
-                <!-- Sử dụng TypeRoomCard cho từng phòng -->
-                <TypeRoomCard v-for="room in roomRow" :key="room.id" :room="room" @room-selected="handleRoomSelection" />
-                </div>
-            </div>
-            <p v-else>No type rooms available.</p>
+      <div class="room-list">
+      <TypeRoomCard
+        v-for="room in typeRooms"
+        :key="room.id"
+        :room="room"
+        :isSelected="room.id === selectedRoomId" 
+        @room-selected="handleRoomSelection"
+      />
+      <p v-if="typeRooms.length === 0">No type rooms available.</p>
     </div>
 </div>
   </template>
@@ -33,6 +34,7 @@ import { fetchTypeRooms } from '../api/typeRoom';
 import TypeRoomCard from '@/components/TypeRoomCard.vue';
 import { useToast } from 'primevue';
 
+
 export default defineComponent({
   name: 'Homepage',
   components: {
@@ -42,6 +44,7 @@ export default defineComponent({
     const typeRooms = ref<any[]>([]);
     const isLoading = ref(true);
     const error = ref<string | null>(null);
+    const selectedRoomId = ref<number | null>(null);
 
     const toast = useToast(); // Initialize Toast
 
@@ -62,27 +65,24 @@ export default defineComponent({
       }
     });
 
-    const chunkedRooms = computed(() => {
-      const result = [];
-      for (let i = 0; i < typeRooms.value.length; i += 2) {
-        result.push(typeRooms.value.slice(i, i + 2));
-      }
-      return result;
-    });
+    const handleRoomSelection = (roomId: number, roomTitle: string) => {
+      if (selectedRoomId.value === roomId) {
+        // Nếu đã chọn và bấm lại -> bỏ chọn
+        selectedRoomId.value = null;
+      } else {
+      selectedRoomId.value = roomId;
 
-
-    const handleRoomSelection = (roomTitle: string) => {
-      console.log('Room selected:', roomTitle);
+      // Hiển thị thông báo
       toast.add({
         severity: 'success',
-        summary: 'Success',
+        summary: 'Room Selected',
         detail: `You have selected ${roomTitle}`,
-        life: 3000, // Toast sẽ hiển thị trong 3 giây
+        life: 3000, // Toast hiển thị trong 3 giây
       });
+      }
     };
 
-
-    return { typeRooms, isLoading, error, chunkedRooms, handleRoomSelection };
+    return { typeRooms, isLoading, error, selectedRoomId, handleRoomSelection };
   },
 });
 </script>
@@ -108,17 +108,15 @@ export default defineComponent({
 }
 .room-list {
   display: flex;
-  flex-direction: column;
-  gap: 30px;
-  margin-bottom: 10px;
+  flex-wrap: wrap; /* Cho phép các thẻ xuống dòng nếu không đủ không gian */
+  gap: 40px; /* Khoảng cách giữa các cards */
+  justify-content: flex-start; /* Căn giữa các cards */
+  padding: 20px;
+  margin-left: 5px;
 }
 .room-row {
   display: flex;
   gap: 30px;
   margin-top: 30px;
 }
-
-
-
-
 </style>

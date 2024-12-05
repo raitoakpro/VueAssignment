@@ -36,7 +36,7 @@
     <div class="select-button-container">
       <button 
       class="select-room-button"
-      :class="{'clicked': isClicked}"
+      :class="{'clicked': isSelected}"
       @click="handleButtonClick"
       >
       SELECT TYPE ROOM</button>
@@ -66,32 +66,31 @@
         }>,
         required: true,
       },
+      isSelected: {
+        type: Boolean,
+        equired: true,
+      },
     },
     setup(props, { emit }) {
     const isClicked = ref(false);
 
     const handleButtonClick = () => {
-      if (!isClicked.value) {
-        isClicked.value = true;
-        emit('room-selected', props.room.title); // Phát sự kiện khi chọn phòng
-      } else {
-        isClicked.value = false;
-      }
+      emit('room-selected', props.room.id, props.room.title);
     };
-      return {isClicked, handleButtonClick};
+      return {handleButtonClick};
     },
   });
   </script>
   
 <style scoped>
 .type-room-card {
+  width: 900px; /* Cố định chiều rộng mỗi card */
   border-radius: 7px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   background-color: #33333305;
-  width: 900px;
-  margin-left: 20px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
 }
 
 .carousel-container {
